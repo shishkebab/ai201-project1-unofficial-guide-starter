@@ -42,11 +42,11 @@ of different professors withouth having to read the entire reviews of each profe
      numbers fit the structure of your documents.
      A review-heavy corpus warrants different chunking than a long FAQ. -->
 
-**Chunk size:**
+**Chunk size:** Each student review is separated and composed of approximately 500 characters. Therefore, the chunk size is 500 characters to contain full review of each student.
 
-**Overlap:**
+**Overlap:** About 75 characters close to the chunk boundary.
 
-**Reasoning:**
+**Reasoning:** Rate My Professor reviews are short summaries of the professor's teaching style and exam difficulty from student's perspective. One chunk should not mix multiple student reviews. A 500-word chunk is large enough to capture one student review including the review and the associated tags such as "Amazing lectures" and "Accessible outside class", etc.
 
 ---
 
@@ -58,11 +58,11 @@ of different professors withouth having to read the entire reviews of each profe
      would you weigh in choosing a different embedding model — context length, multilingual
      support, accuracy on domain-specific text, latency? -->
 
-**Embedding model:**
+**Embedding model:** all-MiniLM-L6-v2
 
-**Top-k:**
+**Top-k:** 5 chunks to retrive and compare reviews.
 
-**Production tradeoff reflection:**
+**Production tradeoff reflection:** If cost was not an issue, a larger model definitely could be used to better understand vague student comment, informal grammar, or other languages. The tradeoff is that stronger models may be slower or require an API instead of running locally. For this project, the chosen model (all-MiniLM-L6-v2) is lightweight, fast, and accurate enough for short English review chunks. 
 
 ---
 
@@ -75,11 +75,12 @@ of different professors withouth having to read the entire reviews of each profe
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 | What do students say about \<professor name\>'s teaching style and exam difficulty? | [\<professor name\>: \<overall rating\>] \<professor name\>'s classes are homework-heavy, test-heavy, and difficult, while some positive reviews say his materials help students understand the subject. |
+| 2 | Is \<professor name\> a good choice for clear lectures and reasonable exams? | [\<professor name\>: \<overall rating\>] Yes, based on the reviews. Students describe him as straightforward, respectful, and focused on course material. |
+| 3 | Which professor has especially negative reviews about CSC335 exams? | [\<professor name\>: \<overall rating\>] Reviews mention difficult exams, unclear project requirements, lecture-heavy classes, and tough grading. |
+| 4 | Who teaches AI or ML/NLP classes? |[\<professor name\>: \<overall rating\>] (additional [\<professor name\>: \<overall rating\>] if multiple) \<professor name(s)> teach \<course name/number>|
+| 5 | who has the better rating than \<professor name> for <course name/number>? |[\<professor name\>: \<overall rating\>] <professor name> has a better rating with <rating>.|
+| 6 | Which professor seems to have the highest difficulty for <class name/number> and why? |[\<professor name\>: \<overall rating\>] <professor name> appears to have the highest difficulty rating at about <rating>. Reviews mention test-heavy courses, many slides to study, weekly quizzes, and limited guidance for exams.  |
 
 ---
 
@@ -89,9 +90,9 @@ of different professors withouth having to read the entire reviews of each profe
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1. Reviews with similar ratings but with different reasons (for e.g., both professors have ratings of 3.5, but the reasons for the ratings could be different.) might generate similar distance scores, generating incorrect response. 
 
-2.
+2. Retrieval may return reviews from wrong professor if the query is broad, such as "Who has hard exams?" 
 
 ---
 
@@ -103,6 +104,48 @@ of different professors withouth having to read the entire reviews of each profe
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
+```text
++-------------+----------------------------+
+| 1. Ingestion                              |
+| Tool: Python, BeautifulSoup               |
+| Source: Rate My Professors                |
+| Remove HTML tags, navigation, buttons     |
+| Output: raw professor pages in plaintext  |
++-------------+----------------------------+
+              |
+              v
++-----------------------------+
+| 2. Chunking                  |
+| Tool: Claude, Python         |
+| Chunk size: 500 characters   |
+| Overlap: 75 characters       |
++-------------+---------------+
+              |
+              v
++-----------------------------+
+| 3. Embedding + Vector Store  |
+| Embedding: all-MiniLM-L6-v2  |
+| Vector DB: ChromaDB          |
+| Chunk text + metadata        |
++-------------+---------------+
+              |
+              v
++-----------------------------+
+| 4. Retrieval                 |
+| Tool: ChromaDB               |
+| Search top-k: 5 chunks       |
+| Return most relevant reviews |
++-------------+---------------+
+              |
+              v
++-----------------------------+
+| 5. Generation                |
+| Tool: llama-3.3-70b-versatile|
+| Input: user question +       |
+| retrieved review chunks      |
+| Output: grounded answer      |
++-----------------------------+
+```
 ---
 
 ## AI Tool Plan
@@ -118,7 +161,11 @@ of different professors withouth having to read the entire reviews of each profe
      with my specified chunk size and overlap" is a plan. -->
 
 **Milestone 3 — Ingestion and chunking:**
+I will use Claude to help write Python code for collecting and cleaning the Rate My Professor review text (`preprocess` function). I will give Claude my Domain, Documents, and Chunking Strategy sections along with the 500-character chunk size, 75-character overlap, and requirement that chunks keep the review metadata (`chunk_text` function). 
+I will verify the output by checking that chunks do not mix professors, each chunk contains one review, and the final chunk list includes the professor name and associated overall rating.
 
 **Milestone 4 — Embedding and retrieval:**
+I will use Claude to help implement the embedding and vector store pipeline. I will give Claude my Retrieval Approach section and ask it to use `sentence-transformers` with `all-MiniLM-L6-v2` and ChromaDB for vector storage. I expect it to produce code that embeds each chunk, stores the chunk text and metadata in ChromaDB, and retrieves the top 8 most relevant chunks for a user query. I will verify the output by printing the retrieved chunks and checking whether the they come from the correct professor and contain relevant reviews.
 
 **Milestone 5 — Generation and interface:**
+I will use Claude to help design the prompt and response format for the chatbot. I will provide it with system prompt so it knows the system must answer only from retrieved review chunks. I will also use Claude to design and implement functions that takes the user question and retrieved chunks, then returns a grounded answer that mentions professor names and course context. I will verify the output by running my five evaluation questions and checking that the answers are accurate and grounded.
