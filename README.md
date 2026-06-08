@@ -14,7 +14,9 @@
      Example: "Student reviews of CS professors at [university] — useful because official
      course descriptions don't reflect teaching style, exam difficulty, or workload." -->
 
-Domain: Student reviews of CS professors at University of Arizona.
+Domain: I chose the student reviews of CS professors at University of Arizona as my domain.
+Throught the interaction with the chat, students can easily compare teaching styles and exam difficulty 
+of different professors withouth having to read the entire reviews of each professor.
 
 ---
 
@@ -48,13 +50,13 @@ Domain: Student reviews of CS professors at University of Arizona.
      - Any preprocessing you did before chunking (e.g., stripping HTML, removing headers)
      - What your final chunk count was across all documents -->
 
-**Chunk size:**
+**Chunk size:** Each student review is separated and composed of approximately 500 characters. Therefore, the chunk size is 500 characters to contain full review of each student.
 
-**Overlap:**
+**Overlap:** About 75 characters close to the chunk boundary.
 
-**Why these choices fit your documents:**
+**Why these choices fit your documents:** Rate My Professor reviews are short summaries of the professor's teaching style and exam difficulty from student's perspective. One chunk should not mix multiple student reviews. A 500-word chunk is large enough to capture one student review including the review and the associated tags such as "Amazing lectures" and "Accessible outside class", etc.
 
-**Final chunk count:**
+**Final chunk count:** 928 (with final chunk size of 328 characters and 75 overlap characters)
 
 ---
 
@@ -66,9 +68,9 @@ Domain: Student reviews of CS professors at University of Arizona.
      Consider: context length limits, multilingual support, accuracy on domain-specific text,
      latency, and local vs. API-hosted. -->
 
-**Model used:**
+**Model used:** all-MiniLM-L6-v2
 
-**Production tradeoff reflection:**
+**Production tradeoff reflection:** If cost was not an issue, a larger model definitely could be used to better understand vague student comment, informal grammar, or other languages. The tradeoff is that stronger models may be slower or require an API instead of running locally. For this project, the chosen model (all-MiniLM-L6-v2) is lightweight, fast, and accurate enough for short English review chunks. 
 
 ---
 
@@ -81,9 +83,9 @@ Domain: Student reviews of CS professors at University of Arizona.
      Do not just say "I told it to use the documents" — show the actual instruction or explain
      the mechanism. -->
 
-**System prompt grounding instruction:**
+**System prompt grounding instruction:** 
 
-**How source attribution is surfaced in the response:**
+**How source attribution is surfaced in the response:** 
 
 ---
 

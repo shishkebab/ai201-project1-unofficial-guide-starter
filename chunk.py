@@ -1,7 +1,29 @@
 import os
+import re
 
 
 DOCS_PATH = "documents"
+
+
+def professor_id_from_filename(filename):
+    """Get the RateMyProfessors numeric id from a source filename."""
+    return filename.split("_", 1)[0]
+
+
+def professor_name_from_text(text, fallback):
+    """Read the professor name from the document header when available."""
+    for line in text.splitlines():
+        if line.startswith("Professor:"):
+            professor_name = line.replace("Professor:", "", 1).strip()
+            if professor_name:
+                return professor_name
+    return fallback
+
+
+def chunk_id_prefix(filename):
+    """Build a stable id prefix from the source filename."""
+    stem = filename.replace(".txt", "")
+    return re.sub(r"[^a-z0-9]+", "_", stem.lower()).strip("_")
 
 
 def load_documents():
@@ -12,9 +34,11 @@ def load_documents():
             filepath = os.path.join(DOCS_PATH, filename)
             with open(filepath, "r", encoding="utf-8") as f:
                 text = f.read()
-            professor_name = filename.replace(".txt", "").replace("_", " ").title()
+            fallback_name = filename.replace(".txt", "").replace("_", " ").title()
+            professor_name = professor_name_from_text(text, fallback_name)
             documents.append({
                 "professor": professor_name,
+                "professor_id": professor_id_from_filename(filename),
                 "filename": filename,
                 "text": text,
             })
@@ -22,7 +46,7 @@ def load_documents():
     return documents
 
 
-def chunk_document(text, professor_name):
+def chunk_document(text, professor_name, source_file="", professor_id=""):
     """
     Split a professor review document into chunks ready for embedding.
 
@@ -32,16 +56,18 @@ def chunk_document(text, professor_name):
       - min_length = 50 characters
 
     Returns a list of dicts, each with:
-      - "text"      : the chunk text
-      - "professor" : the professor name
-      - "chunk_id"  : a unique chunk id
+      - "text"         : the chunk text
+      - "professor"    : the professor name
+      - "professor_id" : the RateMyProfessors id
+      - "source_file"  : the source text filename
+      - "chunk_id"     : a unique chunk id
     """
-    chunk_size = 500
+    chunk_size = 382
     overlap = 75
     min_length = 50
 
     chunks = []
-    prefix = professor_name.lower().replace(" ", "_")
+    prefix = chunk_id_prefix(source_file) if source_file else professor_name.lower().replace(" ", "_")
     counter = 0
 
     start = 0
@@ -53,6 +79,8 @@ def chunk_document(text, professor_name):
             chunks.append({
                 "text": chunk_text,
                 "professor": professor_name,
+                "professor_id": professor_id,
+                "source_file": source_file,
                 "chunk_id": f"{prefix}_{counter}",
             })
             counter += 1
@@ -66,6 +94,11 @@ def build_chunks():
     """Load documents and chunk each one."""
     all_chunks = []
     for document in load_documents():
-        chunks = chunk_document(document["text"], document["professor"])
+        chunks = chunk_document(
+            document["text"],
+            document["professor"],
+            document["filename"],
+            document["professor_id"],
+        )
         all_chunks.extend(chunks)
     return all_chunks

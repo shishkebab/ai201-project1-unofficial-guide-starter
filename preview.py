@@ -1,6 +1,6 @@
 import sys
 
-from simple_chunk import build_chunks
+from chunk import build_chunks
 
 
 def print_first_five_chunks(chunks):

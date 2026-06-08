@@ -11,7 +11,7 @@
 
 I chose the student reviews of CS professors at University of Arizona as my domain.
 Throught the interaction with the chat, students can easily compare teaching styles and exam difficulty 
-of different professors withouth having to read the entire reviews of each professor..
+of different professors withouth having to read the entire reviews of each professor.
 
 ---
 
@@ -77,7 +77,7 @@ of different professors withouth having to read the entire reviews of each profe
 |---|----------|-----------------|
 | 1 | What do students say about \<professor name\>'s teaching style and exam difficulty? | [\<professor name\>: \<overall rating\>] \<professor name\>'s classes are homework-heavy, test-heavy, and difficult, while some positive reviews say his materials help students understand the subject. |
 | 2 | Is \<professor name\> a good choice for clear lectures and reasonable exams? | [\<professor name\>: \<overall rating\>] Yes, based on the reviews. Students describe him as straightforward, respectful, and focused on course material. |
-| 3 | Which professor has especially negative reviews about CSC335 exams? | [\<professor name\>: \<overall rating\>] Reviews mention difficult exams, unclear project requirements, lecture-heavy classes, and tough grading. |
+| 3 | Which professor has especially negative reviews about CSC335? | [\<professor name\>: \<overall rating\>] Reviews mention difficult exams, unclear project requirements, lecture-heavy classes, and tough grading. |
 | 4 | Who teaches AI or ML/NLP classes? |[\<professor name\>: \<overall rating\>] (additional [\<professor name\>: \<overall rating\>] if multiple) \<professor name(s)> teach \<course name/number>|
 | 5 | who has the better rating than \<professor name> for <course name/number>? |[\<professor name\>: \<overall rating\>] <professor name> has a better rating with <rating>.|
 | 6 | Which professor seems to have the highest difficulty for <class name/number> and why? |[\<professor name\>: \<overall rating\>] <professor name> appears to have the highest difficulty rating at about <rating>. Reviews mention test-heavy courses, many slides to study, weekly quizzes, and limited guidance for exams.  |
@@ -126,7 +126,7 @@ of different professors withouth having to read the entire reviews of each profe
 | 3. Embedding + Vector Store  |
 | Embedding: all-MiniLM-L6-v2  |
 | Vector DB: ChromaDB          |
-| Chunk text + metadata        |
+| Imbed Chunks + metadata      |
 +-------------+---------------+
               |
               v
